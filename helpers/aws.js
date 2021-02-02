@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk')
+const fs = require('fs')
 
 AWS.config.update({
     accessKeyId: process.env.AccessKeyID,
@@ -7,47 +8,59 @@ AWS.config.update({
 });
 const s3 = new AWS.S3()
 
-function uploadFile(source,targetName,res){
-  console.log('preparing to upload...');
-  fs.readFile(source, function (err, filedata) {
-    if (!err) {
-      const putParams = {
-          Bucket      : 'traviling',
-          Key         : targetName,
-          Body        : filedata
-      };
-      s3.putObject(putParams, function(err, data){
-        if (err) {
-          console.log('Could nor upload the file. Error :',err);
-          return res.send({success:false});
-        } 
-        else{
-          fs.unlink(source);// Deleting the file from uploads folder(Optional).Do Whatever you prefer.
-          console.log('Successfully uploaded the file');
-          return res.send({success:true});
-        }
-      });
+async function uploadFile (source, targetName, callback) {
+  try {
+    const responseData = []
+    for (let index = 0; index < source.photo.length; index++) {
+      let el = source.photo[index]
+      let putParams = {
+        ACL: 'public-read',
+        Bucket: process.env.BUCKET_NAME,
+        Body: fs.createReadStream(el.path),
+        Key: `${el.originalname}`
+      }
+      const data = await s3.upload(putParams).promise()
+      responseData.push(data.Location)
+      fs.unlinkSync(el.path)
+      // console.log(data);
     }
-    else{
-      console.log({'err':err});
-    }
-  });
+    return responseData
+  } catch (error) {
+    return null
+  }
 }
 
-//The retrieveFile function
-function retrieveFile(filename,res){
+async function deleteFile (source) {
+  try {
+    source = JSON.parse(source)
+    source = source.map(el => {
+      let datum = el.split('/')
+      return datum[datum.length - 1]
+    })
+    for (let index = 0; index < source.length; index++) {
+      let delParams = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: source[index]
+      }
+      const data = await s3.deleteObject(delParams).promise()
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function retrieveFile(filename, callback){
   const getParams = {
-    Bucket: 'sample-bucket-name',
+    Bucket: 'traviling',
     Key: filename
   };
-
   s3.getObject(getParams, function(err, data) {
-    if (err){
-      return res.status(400).send({success:false,err:err});
+    if (err) {
+      callback(err)
     }
     else{
-      return res.send(data.Body);
+      callback(null, data)
     }
   });
 }
-module.exports = { uploadFile, retrieveFile }
+module.exports = { uploadFile, retrieveFile, deleteFile }

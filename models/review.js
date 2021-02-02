@@ -16,11 +16,58 @@ module.exports = (sequelize, DataTypes) => {
   };
   Review.init({
     name: DataTypes.STRING,
-    review: DataTypes.STRING,
-    url_photo: DataTypes.STRING,
-    rating: DataTypes.INTEGER,
+    review: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          args: true,
+          msg: "Review is must be valid alphanumeric character"
+        }
+      }
+    },
+    photos: DataTypes.STRING(60000),
+    rating: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      validate: {
+        notNull: {
+          args: true,
+          msg: 'Rating must be number'
+        },
+        notEmpty: {
+          args: true,
+          msg: "Rating must be number"
+        },
+        min: {
+          args: [0],
+          msg: "Rating cannot less than 0"
+        },
+        max: {
+          args: 5,
+          msg: 'Rating cannot more than 5'
+        },
+        isFloat: {
+          args: true,
+          msg: "Please use dot(.) as comma for decimal"
+        }
+      }
+    },
     UserId: DataTypes.INTEGER,
-    product_name: DataTypes.INTEGER
+    product_name: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'Product name cannot empty'
+        },
+        notNull: {
+          args: true,
+          msg: 'Product name cannot empty'
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'Review',

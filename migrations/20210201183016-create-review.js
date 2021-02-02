@@ -14,11 +14,11 @@ module.exports = {
       review: {
         type: Sequelize.STRING
       },
-      url_photo: {
-        type: Sequelize.STRING
+      photos: {
+        type: Sequelize.STRING(60000)
       },
       rating: {
-        type: Sequelize.INTEGER
+        type: Sequelize.FLOAT
       },
       product_name: {
         type: Sequelize.STRING

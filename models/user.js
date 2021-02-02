@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
     email: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: {
+        args: true,
+        msg: "Email already registered"
+      },
       validate: {
         notNull: {
           args: false,
@@ -53,13 +57,14 @@ module.exports = (sequelize, DataTypes) => {
         isEmail: {
           args: true,
           msg: "Please give valid email"
-        }
+        },
       }
     }
   }, {
     hooks: {
       beforeCreate: (data, option) => {
         data.password = hash(data.password)
+        data.email = data.email.toLowerCase()
       }
     }, 
     sequelize,
