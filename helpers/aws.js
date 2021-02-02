@@ -8,7 +8,7 @@ AWS.config.update({
 });
 const s3 = new AWS.S3()
 
-async function uploadFile (source, targetName, callback) {
+async function uploadFile (source) {
   try {
     const responseData = []
     for (let index = 0; index < source.photo.length; index++) {
@@ -22,7 +22,6 @@ async function uploadFile (source, targetName, callback) {
       const data = await s3.upload(putParams).promise()
       responseData.push(data.Location)
       fs.unlinkSync(el.path)
-      // console.log(data);
     }
     return responseData
   } catch (error) {
@@ -49,18 +48,4 @@ async function deleteFile (source) {
   }
 }
 
-function retrieveFile(filename, callback){
-  const getParams = {
-    Bucket: 'traviling',
-    Key: filename
-  };
-  s3.getObject(getParams, function(err, data) {
-    if (err) {
-      callback(err)
-    }
-    else{
-      callback(null, data)
-    }
-  });
-}
-module.exports = { uploadFile, retrieveFile, deleteFile }
+module.exports = { uploadFile, deleteFile }
