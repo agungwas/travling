@@ -15,8 +15,9 @@ module.exports = class ReviewController {
       link = JSON.stringify(link)
       inserted.photos = link
       await inserted.save()
-      const { id, photos } = inserted
-      res.status(201).json({ message: 'Successfully added review', review_added: { name, review, rating, product_name, id, image_url: JSON.parse(photos)} })
+      let { id, photos } = inserted
+      photos = JSON.parse(photos).map(el => el.Location)
+      res.status(201).json({ message: 'Successfully added review', review_added: { name, review, rating, product_name, id, image_url: photos} })
     } catch (error) {
       next(error)
     }
@@ -36,15 +37,21 @@ module.exports = class ReviewController {
       const { name, rating, review } = req.body
       const edited = await Review.update({ name, rating, review }, { where: { id: +req.params.id }, returning: true })
       if (edited[0] === 0) throw { status: 404, message: 'Review was not found' }
-      const { product_name, id, photos } = edited[1][0]
-      res.status(200).json({ message: 'Successfully edit review', review_edited: { name, rating, review, product_name, id, image_url: JSON.parse(photos)} })
+      let { product_name, id, photos } = edited[1][0]
+      photos = JSON.parse(photos).map(el => el.Location)
+      res.status(200).json({ message: 'Successfully edit review', review_edited: { name, rating, review, product_name, id, image_url: photos } })
     } catch (error) {
       next(error)
     }
   }
   static async getAll (req, res, next) {
     try {
-      res.status(200).json({ reviews: await Review.findAll({ where: { UserId: +req.userLoginned.id }}) })
+      let data = await Review.findAll({ where: { UserId: +req.userLoginned.id }})
+      data = data.map(el => {
+        el.photos = JSON.parse(el.photos).map(el => el.Location)
+        return el
+      })
+      res.status(200).json({ reviews: data })
     } catch (error) {
       next(error)
     }

@@ -29,7 +29,7 @@ module.exports = class UserController {
   static async picture (req, res, next) {
     try {
       const link = await uploadFile(req.files)
-      let hasil = await User.update({ url_photo_profile: link[0] }, { where: { id: +req.userLoginned.id }, returning: true })
+      let hasil = await User.update({ url_photo_profile: JSON.stringify(link[0]) }, { where: { id: +req.userLoginned.id }, returning: true })
       if (hasil[0] === 0) throw { status: 404, message: 'User was not found' }
       res.status(200).json({ message: "Profile picture updated successfully" })
     } catch (error) {
@@ -38,11 +38,13 @@ module.exports = class UserController {
   }
   static async delPicture (req, res, next) {
     try {
-      const { url_photo_profile } = await User.findByPk(+req.userLoginned.id)
-      await deleteFile([url_photo_profile])
-      let hasil = await User.update({ url_photo_profile: "" }, { where: { id: +req.userLoginned.id }, returning: true })
-      if (hasil[0] === 0) throw { status: 404, message: 'User was not found' }
-      res.status(200).json({ message: "Profile picture updated successfully" })
+      const user = await User.findByPk(+req.userLoginned.id)
+      let url = JSON.parse(user.url_photo_profile)
+      url = JSON.stringify([url])
+      await deleteFile(url)
+      user.url_photo_profile = null
+      await user.save()
+      res.status(200).json({ message: "Profile picture deleted successfully" })
     } catch (error) {
       next(error)
     }

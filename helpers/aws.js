@@ -20,7 +20,7 @@ async function uploadFile (source) {
         Key: `${el.originalname}`
       }
       const data = await s3.upload(putParams).promise()
-      responseData.push(data.Location)
+      responseData.push({ Location: data.Location, Key: data.key})
       fs.unlinkSync(el.path)
     }
     return responseData
@@ -32,16 +32,12 @@ async function uploadFile (source) {
 async function deleteFile (source) {
   try {
     source = JSON.parse(source)
-    source = source.map(el => {
-      let datum = el.split('/')
-      return datum[datum.length - 1]
-    })
     for (let index = 0; index < source.length; index++) {
       let delParams = {
         Bucket: process.env.BUCKET_NAME,
-        Key: source[index]
+        Key: source[index].Key
       }
-      const data = await s3.deleteObject(delParams).promise()
+      await s3.deleteObject(delParams).promise()
     }
   } catch (error) {
     console.log(error);

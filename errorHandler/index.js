@@ -1,8 +1,8 @@
 const { JsonWebTokenError } = require("jsonwebtoken");
 
 module.exports = (err, req, res, next) => {
-  console.log(err, "dari error");
-  console.log(JSON.stringify(err));
+  // console.log(err, "dari error");
+  // console.log(JSON.stringify(err));
   
   let [ status, error ] = [ err.status || 500,  err.error || 'Internal server error' ]
   
