@@ -20,8 +20,11 @@ module.exports = {
       rating: {
         type: Sequelize.INTEGER
       },
-      UserId: {
+      product_name: {
         type: Sequelize.STRING
+      },
+      UserId: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

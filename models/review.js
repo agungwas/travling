@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Review.belongsTo(models.User)
     }
   };
   Review.init({
@@ -18,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     review: DataTypes.STRING,
     url_photo: DataTypes.STRING,
     rating: DataTypes.INTEGER,
-    UserId: DataTypes.STRING
+    UserId: DataTypes.INTEGER,
+    product_name: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Review',
